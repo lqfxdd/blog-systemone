@@ -23,6 +23,6 @@ app.use('/api/articles', articleRoutes);
 app.use('/api/categories', categoryRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 后端服务启动于 http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 后端服务启动于 http://0.0.0.0:${PORT}`);
 });
