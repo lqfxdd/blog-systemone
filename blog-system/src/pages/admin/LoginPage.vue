@@ -26,14 +26,21 @@
         />
       </div>
       <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
-      <button
-        class="btn btn-primary"
-        :disabled="loading"
-        style="width: 100%; justify-content: center; margin-top: 16px"
-        @click="handleLogin"
-      >
-        {{ loading ? '登录中...' : '🔑 登录' }}
-      </button>
+      
+      <!-- 按钮组：登录 + 首页 -->
+      <div class="button-group">
+        <button
+          class="btn btn-primary"
+          :disabled="loading"
+          @click="handleLogin"
+        >
+          {{ loading ? '登录中...' : '🔑 登录' }}
+        </button>
+        <button class="btn btn-outline" @click="$router.push('/')">
+          🏠 首页
+        </button>
+      </div>
+
       <p class="hint">
         还没有账号？<router-link to="/register">立即注册</router-link>
       </p>
@@ -113,5 +120,16 @@ async function handleLogin() {
 .hint a {
   color: var(--primary);
   font-weight: 500;
+}
+
+/* 按钮组样式 */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.button-group .btn {
+  flex: 1;
+  justify-content: center;
 }
 </style>

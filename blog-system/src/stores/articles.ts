@@ -10,6 +10,10 @@ export const useArticleStore = defineStore('articles', () => {
   const loading = ref(false)
   const currentArticle = ref<Article | null>(null)
 
+  // 全局搜索与分类筛选状态
+  const searchQuery = ref('')
+  const selectedCategory = ref('')
+
   // 获取文章列表（默认取全部，或根据参数筛选）
   async function fetchArticles(params?: Record<string, any>) {
     loading.value = true
@@ -84,11 +88,20 @@ export const useArticleStore = defineStore('articles', () => {
     categories.value = await categoryApi.deleteCategory(name)
   }
 
+  // 设置搜索关键词
+  function setSearchQuery(q: string) { searchQuery.value = q }
+  // 设置当前选中的分类
+  function setSelectedCategory(cat: string) { selectedCategory.value = cat }
+
   return {
     articles,
     categories,
     loading,
     currentArticle,
+    searchQuery,
+    selectedCategory,
+    setSearchQuery,
+    setSelectedCategory,
     fetchArticles,
     fetchArticleById,
     createArticle,
