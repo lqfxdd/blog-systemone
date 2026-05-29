@@ -30,7 +30,7 @@
             type="text"
             placeholder="搜索文章..."
             class="search-input"
-            @input="performSearch"
+            @input="debouncedSearch"
           />
         </div>
   
@@ -71,11 +71,28 @@
   const localSearch = ref('')
   const mobileMenuOpen = ref(false)
   
+  // 搜索事件发射
+  const emit = defineEmits<{
+    (e: 'search', value: string): void
+  }>()
+  
+  // 防抖定时器
+  let timer: ReturnType<typeof setTimeout>
+  
+  // 防抖搜索（300ms 延迟）
+  function debouncedSearch() {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      emit('search', localSearch.value)
+    }, 300)
+  }
+  
   // 主动拉取文章数据，确保搜索时有数据
   onMounted(() => {
     articleStore.fetchArticles()
   })
   
+  // 搜索结果（本地过滤，避免影响全局列表）
   const searchResults = computed(() => {
     const q = localSearch.value.trim().toLowerCase()
     if (!q) return []
@@ -114,6 +131,7 @@
   </script>
   
   <style scoped>
+  /* 所有样式保持不变，此处省略，与之前完全相同 */
   .sidebar {
     position: fixed;
     top: 0;
@@ -166,8 +184,6 @@
     opacity: 0.9;
     margin-top: 5px;
   }
-  
-  /* 欢迎语 */
   .welcome-msg {
     text-align: center;
     font-size: 0.9rem;
@@ -175,8 +191,6 @@
     line-height: 1.6;
     margin: 0;
   }
-  
-  /* 按钮组 */
   .auth-link {
     display: flex;
     gap: 10px;
@@ -199,8 +213,6 @@
   .auth-btn:hover {
     background: rgba(255,255,255,0.4);
   }
-  
-  /* 搜索框 */
   .search-box {
     position: relative;
     width: 100%;
@@ -227,8 +239,6 @@
   }
   .search-input::placeholder { color: rgba(255,255,255,0.7); }
   .search-input:focus { background: rgba(255,255,255,0.5); }
-  
-  /* 搜索结果 */
   .search-results {
     width: 100%;
     max-height: 200px;
@@ -237,7 +247,7 @@
     backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 8px;
-    margin-top: -10px; /* 紧贴搜索框 */
+    margin-top: -10px;
   }
   .search-item {
     padding: 8px 10px;
@@ -272,8 +282,6 @@
     font-size: 0.85rem;
     padding: 10px;
   }
-  
-  /* 移动端保持不变 */
   .mobile-toggle {
     display: none;
     position: fixed;
