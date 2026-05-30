@@ -43,13 +43,12 @@ export const useArticleStore = defineStore('articles', () => {
     return article
   }
 
-  // 更新文章
+  // 更新文章（修复：更新后重新拉取列表，确保首页展示最新内容）
   async function updateArticle(id: string, data: Partial<Article>) {
     const updated = await articleApi.updateArticle(id, data)
-    const index = articles.value.findIndex(
-      a => (a._id || a.id) === id
-    )
-    if (index !== -1) articles.value[index] = updated
+    // 重新拉取全部文章，保证列表与后端同步
+    await fetchArticles()
+    // 同时更新当前正在查看的文章（若详情页打开着）
     if ((currentArticle.value?._id || currentArticle.value?.id) === id) {
       currentArticle.value = updated
     }
