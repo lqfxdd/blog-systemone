@@ -3,7 +3,7 @@
       <BlogSidebar @search="handleSearch" />
       <main class="main-content">
         <div class="content-wrapper">
-          <router-view />
+          <router-view :key="$route.fullPath" />
         </div>
       </main>
     </div>

@@ -56,7 +56,6 @@
       <!-- Markdown 编辑器 -->
       <div class="form-group">
         <label>文章内容 <span class="required">*</span>（Markdown）</label>
-        <!-- 现在 form.content 一定是 string，所以 v-model 不会报类型错误 -->
         <MarkdownEditor v-model="form.content" />
       </div>
 
@@ -94,16 +93,14 @@ const isEdit = computed(() => !!route.params.id)
 const saving = ref(false)
 const tagsInput = ref('')
 
-// 修复：明确 form 各字段为非可选，初始值均为空字符串（content 明确为 string）
 const form = reactive({
   title: '',
-  content: '',    // 不再是 string | undefined
+  content: '',
   category: '',
   excerpt: '',
   tags: [] as string[],
 })
 
-// 提取 id 为常量，使用非空断言，因为 isEdit 已判断存在
 const articleId = computed(() => route.params.id as string)
 
 onMounted(async () => {
@@ -132,15 +129,15 @@ async function handleSave() {
 
   saving.value = true
   const data: Partial<Article> = {
-    ...form,
+    title: form.title.trim(),
+    content: form.content,
+    category: form.category || '未分类',
     tags: tagsInput.value
       .split(',')
       .map((t) => t.trim())
       .filter(Boolean),
-    // form.excerpt 和 form.content 都是 string，无需可选链
-    excerpt:
-      form.excerpt ||
-      form.content.replace(/[#*`>\n]/g, '').substring(0, 150) + '...',
+    // 始终用最新内容生成摘要
+    excerpt: form.content.replace(/[#*`>\n]/g, '').substring(0, 150) + '...',
   }
 
   try {
@@ -151,6 +148,7 @@ async function handleSave() {
       await articleStore.createArticle(data)
       toastStore.success('文章发布成功')
     }
+    // 修改点：跳转到后台文章管理页面，而不是首页刷新
     router.push('/admin/articles')
   } catch (e: any) {
     toastStore.error(e.message || '保存失败，请重试')

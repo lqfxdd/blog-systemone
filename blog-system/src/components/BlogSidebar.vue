@@ -10,16 +10,21 @@
           <p class="bio">hellohello</p>
         </div>
   
-        <!-- 欢迎语（上移至这里） -->
+        <!-- 欢迎语 -->
         <div class="welcome-msg">
           <p>🌼 欢迎光临</p>
         </div>
   
-        <!-- 并排按钮：首页 + 登录/退出 -->
+        <!-- 并排按钮：首页 + 管理/登录/退出 -->
         <div class="auth-link">
           <router-link to="/" class="auth-btn home-btn">🏠 首页</router-link>
-          <router-link v-if="!authStore.isAuthenticated" to="/login" class="auth-btn login-btn">🔑 登录</router-link>
-          <button v-else class="auth-btn logout-btn" @click="handleLogout">🚪 退出</button>
+          <!-- 已登录时显示“管理”和“退出” -->
+          <template v-if="authStore.isAuthenticated">
+            <router-link to="/admin" class="auth-btn admin-btn">⚙️ 管理</router-link>
+            <button class="auth-btn logout-btn" @click="handleLogout">🚪 退出</button>
+          </template>
+          <!-- 未登录时显示“登录” -->
+          <router-link v-else to="/login" class="auth-btn login-btn">🔑 登录</router-link>
         </div>
   
         <!-- 搜索框（带图标） -->
@@ -34,7 +39,7 @@
           />
         </div>
   
-        <!-- 搜索结果列表（搜索框下方） -->
+        <!-- 搜索结果列表 -->
         <div v-if="searchResults.length > 0" class="search-results">
           <div
             v-for="article in searchResults"
@@ -71,15 +76,12 @@
   const localSearch = ref('')
   const mobileMenuOpen = ref(false)
   
-  // 搜索事件发射
   const emit = defineEmits<{
     (e: 'search', value: string): void
   }>()
   
-  // 防抖定时器
   let timer: ReturnType<typeof setTimeout>
   
-  // 防抖搜索（300ms 延迟）
   function debouncedSearch() {
     clearTimeout(timer)
     timer = setTimeout(() => {
@@ -87,12 +89,10 @@
     }, 300)
   }
   
-  // 主动拉取文章数据，确保搜索时有数据
   onMounted(() => {
     articleStore.fetchArticles()
   })
   
-  // 搜索结果（本地过滤，避免影响全局列表）
   const searchResults = computed(() => {
     const q = localSearch.value.trim().toLowerCase()
     if (!q) return []
@@ -102,13 +102,13 @@
         article.content?.toLowerCase().includes(q) ||
         article.tags?.some(tag => tag.toLowerCase().includes(q))
       )
-      .slice(0, 10) // 最多显示10条
+      .slice(0, 10)
   })
   
   function goToArticle(id: string | undefined) {
     if (id) {
       router.push(`/article/${id}`)
-      localSearch.value = '' // 清空搜索，让结果消失
+      localSearch.value = ''
     }
   }
   
@@ -131,7 +131,6 @@
   </script>
   
   <style scoped>
-  /* 所有样式保持不变，此处省略，与之前完全相同 */
   .sidebar {
     position: fixed;
     top: 0;

@@ -23,6 +23,12 @@ router.get('/', async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
     const total = await Article.countDocuments(filter);
+
+    // 禁止浏览器和代理缓存
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
     res.json({ articles, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
   } catch (err) {
     res.status(500).json({ message: '服务器错误' });

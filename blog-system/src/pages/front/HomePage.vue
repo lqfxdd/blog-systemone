@@ -26,7 +26,7 @@
     <div v-else class="article-list">
       <article
         v-for="article in filteredArticles"
-        :key="article._id || article.id"
+        :key="article._id || article.id || Math.random()"
         class="article-card"
         @click="goToArticle((article._id || article.id)!)"
       >
@@ -45,28 +45,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useArticleStore } from '@/stores/articles'
 
-const articleStore = useArticleStore()
+const route = useRoute()
 const router = useRouter()
+const articleStore = useArticleStore()
 
-onMounted(() => {
-  articleStore.fetchArticles()
-  articleStore.fetchCategories()
-})
+// 每次路由变化到首页时，重新拉取数据
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/') {
+      articleStore.fetchArticles()
+      articleStore.fetchCategories()
+    }
+  },
+  { immediate: true }
+)
 
-// 只根据分类筛选，不再使用 searchQuery
+// 根据选中的分类过滤文章，忽略首尾空格，确保精确匹配
 const filteredArticles = computed(() => {
   let result = articleStore.articles
-  const cat = articleStore.selectedCategory
-  if (cat) result = result.filter(a => a.category === cat)
-  // 按创建时间倒序排列
+  const cat = articleStore.selectedCategory?.trim()
+  if (cat) {
+    result = result.filter(a => a.category?.trim() === cat)
+  }
   return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 })
 
-function goToArticle(id: string) { router.push(`/article/${id}`) }
+function goToArticle(id: string) {
+  router.push(`/article/${id}`)
+}
+
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
@@ -75,50 +87,32 @@ function formatDate(d: string) {
 <style scoped>
 .home { padding-top: 10px; }
 .tabs {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 30px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 15px;
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px;
+  border-bottom: 1px solid var(--border); padding-bottom: 15px;
 }
 .tabs button {
-  padding: 6px 18px;
-  border-radius: 20px;
-  background: #f1f2f6;
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.9rem;
+  padding: 6px 18px; border-radius: 20px; background: #f1f2f6;
+  color: var(--text-secondary); font-weight: 500; font-size: 0.9rem;
   transition: all 0.3s;
 }
 .tabs button.active {
   background: linear-gradient(135deg, #ff9a9e, #a18cd1);
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(255,154,158,0.3);
+  color: #fff; box-shadow: 0 4px 10px rgba(255,154,158,0.3);
 }
 .article-list { display: flex; flex-direction: column; gap: 20px; }
 .article-card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 25px;
-  box-shadow: var(--shadow);
-  transition: transform 0.3s, box-shadow 0.3s;
-  cursor: pointer;
-  border: 1px solid transparent;
+  background: var(--card-bg); border-radius: var(--radius); padding: 25px;
+  box-shadow: var(--shadow); transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer; border: 1px solid transparent;
 }
 .article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-4px); box-shadow: var(--shadow-hover);
   border-color: rgba(161,140,209,0.3);
 }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .category-tag {
-  background: rgba(161,140,209,0.15);
-  color: var(--primary-light);
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  background: rgba(161,140,209,0.15); color: var(--primary-light);
+  padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;
 }
 .date { color: var(--text-secondary); font-size: 0.85rem; }
 .title { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }

@@ -19,7 +19,13 @@
           </router-link>
         </nav>
         <div class="sidebar-footer">
-          <button class="nav-item" @click="handleLogout">🚪 退出</button>
+          <!-- 新增：返回前台首页 -->
+          <router-link to="/" class="nav-item home-link">
+            🏠 返回首页
+          </router-link>
+          <button class="nav-item logout-btn" @click="handleLogout">
+            🚪 退出
+          </button>
         </div>
       </aside>
       <main class="admin-content">
@@ -97,13 +103,22 @@
     border-top: 1px solid #636e72;
     padding-top: 10px;
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .home-link {
+    /* 确保与导航项样式一致 */
+  }
+  .logout-btn {
+    /* 样式继承 .nav-item */
   }
   .admin-content {
     flex: 1;
     padding: 30px;
     overflow-y: auto;
   }
-  /* 移动端适配：侧边栏折叠到顶部 */
+  /* 移动端适配 */
   @media (max-width: 768px) {
     .admin-layout {
       flex-direction: column;
@@ -119,7 +134,7 @@
     .sidebar-header { border-bottom: none; margin-bottom: 0; padding: 0; }
     .sidebar-nav { flex-direction: row; flex-wrap: wrap; gap: 0; }
     .nav-item { padding: 6px 12px; font-size: 0.85rem; }
-    .sidebar-footer { margin-top: 0; border-top: none; }
+    .sidebar-footer { margin-top: 0; border-top: none; flex-direction: row; }
     .admin-content { padding: 20px; }
   }
   </style>

@@ -1,8 +1,11 @@
 import apiClient from './index'
 import type { Article } from '@/types'
 
-export const getArticles = (params?: any) =>
-  apiClient.get('/articles', { params }).then(res => res.data)
+// 获取文章列表（添加时间戳参数，避免浏览器/缓存数据未更新）
+export const getArticles = (params?: any) => {
+  const finalParams = { ...params, _t: Date.now() }
+  return apiClient.get('/articles', { params: finalParams }).then(res => res.data)
+}
 
 export const getArticleById = (id: string) =>
   apiClient.get(`/articles/${id}`).then(res => res.data)

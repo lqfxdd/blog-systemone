@@ -19,7 +19,8 @@ export const useArticleStore = defineStore('articles', () => {
     loading.value = true
     try {
       const res = await articleApi.getArticles({ limit: 1000, ...params })
-      articles.value = res.articles || []
+      // 强制创建新数组，确保响应式更新
+      articles.value = [...(res.articles || [])]
     } finally {
       loading.value = false
     }
